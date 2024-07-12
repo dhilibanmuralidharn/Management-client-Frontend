@@ -6,8 +6,7 @@ const UserList = ({ users, deleteUser, fetchUsers }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [filter, setFilter] = useState("");
-
-
+  const [sortDirection, setSortDirection] = useState("asc");
 
   const calculateAge = (dob) => {
     const diff = new Date() - new Date(dob);
@@ -39,12 +38,34 @@ const UserList = ({ users, deleteUser, fetchUsers }) => {
     }
   };
 
-
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
   };
 
-  const filteredUsers = users.filter((user) => {
+  const handleSort = () => {
+    setSortDirection((prevDirection) => {
+      if (prevDirection === "asc") return "desc";
+      return "asc";
+    });
+  };
+
+  const getSortedUsers = () => {
+    if (!sortDirection) return users;
+
+    const sortedUsers = [...users].sort((a, b) => {
+      if (sortDirection === "asc") {
+        return a.name.localeCompare(b.name);
+      } else {
+        return b.name.localeCompare(a.name);
+      }
+    });
+
+    return sortedUsers;
+  };
+
+  const sortedUsers = getSortedUsers();
+
+  const filteredUsers = sortedUsers.filter((user) => {
     const age = calculateAge(user.dob).toString();
     return (
       user.name.toLowerCase().includes(filter.toLowerCase()) ||
@@ -97,9 +118,15 @@ const UserList = ({ users, deleteUser, fetchUsers }) => {
                     <tr>
                       <th
                         scope="col"
-                        className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                        className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6 cursor-pointer"
+                        onClick={handleSort}
                       >
                         Name
+                        {sortDirection === "asc"
+                          ? " ↑"
+                          : sortDirection === "desc"
+                          ? " ↓"
+                          : ""}
                       </th>
                       <th
                         scope="col"
@@ -117,7 +144,7 @@ const UserList = ({ users, deleteUser, fetchUsers }) => {
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Adderss
+                        Address
                       </th>
                       <th
                         scope="col"
@@ -199,7 +226,6 @@ const UserList = ({ users, deleteUser, fetchUsers }) => {
           />
         </Modal>
       </div>
-      
     </>
   );
 };
